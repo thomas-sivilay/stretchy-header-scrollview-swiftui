@@ -15,41 +15,65 @@ struct ScrollViewExample: View {
     
     var body: some View {
         ScrollView {
-            Group {
-                GeometryReader { reader -> AnyView in
-                    let frame = reader.frame(in: .global)
-                    let height = frame.maxY
-                    self.maxY = height
-                    return AnyView(
-                        ZStack {
-                            Image("willian-justen-de-vasconcellos")
-                                .fixedSize(horizontal: true, vertical: false)
-                                .frame(height: height)
-                            VStack(spacing: 4) {
-                                Text("Willian\nJusten de Vasconcellos")
-                                    .foregroundColor(.white)
-                                    .bold()
-                                    .multilineTextAlignment(.center)
-                                    .font(.title)
-                                Text("debugFrame: \(frame.debugDescription)")
-                                Text("maxY: \(self.maxY)")
-                            }
-                        }
-                        .frame(width: reader.size.width)
-                    )
+            ScrollViewHeaderView(maxY: $maxY)
+                .frame(height: maxY <= 400 ? 400 : min(maxY, 400))
+//                .clipped()
+            ScrollViewContentView()
+        }
+    }
+}
+
+struct ScrollViewHeaderView: View {
+    
+    @Binding var maxY: CGFloat
+    
+    var body: some View {
+        GeometryReader { proxy -> AnyView in
+            let frame = proxy.frame(in: .global)
+            let height = frame.maxY
+            self.maxY = height
+
+            return AnyView(
+                ZStack {
+                    Image("willian-justen-de-vasconcellos")
+                        .fixedSize(horizontal: true, vertical: false)
+                        .frame(height: height)
+                    VStack(spacing: 4) {
+                        Text("Willian\nJusten de Vasconcellos")
+                            .foregroundColor(.white)
+                            .bold()
+                            .multilineTextAlignment(.center)
+                            .font(.title)
+                        Text("debugFrame: \(frame.debugDescription)")
+                        Text("maxY: \(self.maxY)")
+                    }
                 }
-            }
-            .frame(height:
-                maxY <= 400 ? 400 : min(maxY, 400)
+                .frame(width: proxy.size.width)
             )
-            .clipped()
+        }
+    }
+}
+
+struct ScrollViewContentView: View {
+    
+    var body: some View {
+        GeometryReader { proxy -> AnyView in
+            print(proxy)
             
-            Text("Row 1")
-            Text("Row 2")
-            Text("Row 3")
-            Text("Row 4")
-            Text("Row 5")
-            Text("Row 6")
+            return AnyView(
+                Form {
+                    Text("\(proxy.size.debugDescription)")
+                        .onTapGesture {
+                            print("TEST")
+                        }
+                    Text("Row 2")
+                    Text("Row 3")
+                    Text("Row 4")
+                    Text("Row 5")
+                    Text("Row 6")
+                }
+                .frame(width: proxy.size.width, height: 400)
+            )
         }
     }
 }
