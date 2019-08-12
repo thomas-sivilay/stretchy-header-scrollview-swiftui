@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F540CF2223015D2600B85DE5 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F540CF2123015D2600B85DE5 /* DetailView.swift */; };
 		F5CEC97722FB7C5400AF3AD5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5CEC97622FB7C5400AF3AD5 /* AppDelegate.swift */; };
 		F5CEC97922FB7C5400AF3AD5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5CEC97822FB7C5400AF3AD5 /* SceneDelegate.swift */; };
 		F5CEC97B22FB7C5400AF3AD5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5CEC97A22FB7C5400AF3AD5 /* ContentView.swift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F540CF2123015D2600B85DE5 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		F5CEC97322FB7C5400AF3AD5 /* StretchyScrollApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StretchyScrollApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CEC97622FB7C5400AF3AD5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F5CEC97822FB7C5400AF3AD5 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				F5CEC98A22FB7C6200AF3AD5 /* FormExample.swift */,
 				F5CEC98C22FB7D0200AF3AD5 /* ListExample.swift */,
 				F5CEC98E22FB7DC000AF3AD5 /* ScrollViewExample.swift */,
+				F540CF2123015D2600B85DE5 /* DetailView.swift */,
 				F5CEC97C22FB7C5400AF3AD5 /* Assets.xcassets */,
 				F5CEC98122FB7C5400AF3AD5 /* LaunchScreen.storyboard */,
 				F5CEC98422FB7C5400AF3AD5 /* Info.plist */,
@@ -158,6 +161,7 @@
 				F5CEC97722FB7C5400AF3AD5 /* AppDelegate.swift in Sources */,
 				F5CEC97922FB7C5400AF3AD5 /* SceneDelegate.swift in Sources */,
 				F5CEC98D22FB7D0200AF3AD5 /* ListExample.swift in Sources */,
+				F540CF2223015D2600B85DE5 /* DetailView.swift in Sources */,
 				F5CEC97B22FB7C5400AF3AD5 /* ContentView.swift in Sources */,
 				F5CEC98B22FB7C6200AF3AD5 /* FormExample.swift in Sources */,
 				F5CEC98F22FB7DC000AF3AD5 /* ScrollViewExample.swift in Sources */,

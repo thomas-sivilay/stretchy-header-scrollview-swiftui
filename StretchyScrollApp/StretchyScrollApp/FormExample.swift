@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct FormExample: View {
+    
     var body: some View {
         Form {
             Section(header: Text("Section 1")) {
@@ -17,6 +18,9 @@ struct FormExample: View {
                 Text("Row 3")
                 Text("Row 4")
                 Text("Row 5")
+                NavigationLink(destination: DetailView(title: "Nav")) {
+                    Text("Navigation link")
+                }
             }
             Section(header: Text("Section 2")) {
                 Text("Row 1")

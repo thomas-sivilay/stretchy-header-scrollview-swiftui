@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct ListExample: View {
+    
     var body: some View {
         List {
             Text("Row 1")
@@ -17,6 +18,9 @@ struct ListExample: View {
             Text("Row 4")
             Text("Row 5")
             Text("Row 6")
+            NavigationLink(destination: DetailView(title: "Nav")) {
+                Text("Navigation link")
+            }
         }
     }
 }

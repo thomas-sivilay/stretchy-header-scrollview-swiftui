@@ -12,31 +12,42 @@ struct ContentView: View {
     @State private var selection = 0
  
     var body: some View {
-        TabView(selection: $selection){
-            FormExample()
-                .tabItem {
-                    VStack {
-                        Image("first")
-                        Text("Form")
-                    }
+        TabView(selection: $selection) {
+            NavigationView {
+                FormExample()
+                    .navigationBarTitle("Form")
+            }
+            .tabItem {
+                VStack {
+                    Image("first")
+                    Text("Form")
                 }
-                .tag(0)
-            ListExample()
-                .tabItem {
-                    VStack {
-                        Image("second")
-                        Text("List")
-                    }
+            }
+            .tag(0)
+            
+            NavigationView {
+                ListExample()
+                    .navigationBarTitle("List")
+            }
+            .tabItem {
+                VStack {
+                    Image("second")
+                    Text("List")
                 }
-                .tag(1)
-            ScrollViewExample()
-                .tabItem {
-                    VStack {
-                        Image("second")
-                        Text("ScrollView")
-                    }
+            }
+            .tag(1)
+            
+            NavigationView {
+                ScrollViewExample()
+                    .navigationBarTitle("Scroll")
+            }
+            .tabItem {
+                VStack {
+                    Image("second")
+                    Text("ScrollView")
                 }
-                .tag(2)
+            }
+            .tag(2)
         }
     }
 }

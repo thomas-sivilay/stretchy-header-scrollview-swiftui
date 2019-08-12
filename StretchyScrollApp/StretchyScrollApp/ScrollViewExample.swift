@@ -71,6 +71,9 @@ struct ScrollViewContentView: View {
                     Text("Row 4")
                     Text("Row 5")
                     Text("Row 6")
+                    NavigationLink(destination: DetailView(title: "Nav")) {
+                        Text("Navigation link")
+                    }
                 }
                 .frame(width: proxy.size.width, height: 400)
             )
