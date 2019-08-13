@@ -9,10 +9,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selection = 0
+    @State private var selection = 2
  
     var body: some View {
-        TabbedView(selection: $selection) {
+        TabView(selection: $selection) {
             NavigationView {
                 FormExample()
                     .navigationBarTitle("Form")

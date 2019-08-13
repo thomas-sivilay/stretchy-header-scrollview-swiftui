@@ -15,18 +15,9 @@ struct ScrollViewExample: View {
     var body: some View {
         ZStack {
             ScrollViewHeaderView(offset: $offset)
-                .onPreferenceChange(ScrollOffsetPreferenceKey.self) {
-                    print($0)
-                    self.offset = $0
-                }
             ScrollViewContentView()
                 .offset(x: 0, y: 220 + offset)
                 .padding(.bottom, 220 + offset)
-                .onPreferenceChange(ScrollOffsetPreferenceKey.self) {
-                    print($0)
-                    self.offset = $0
-                }
-
         }
     }
 }
@@ -62,11 +53,11 @@ struct ScrollViewHeaderView: View {
     }
 }
 
-struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+struct ScrollOffsetPreferenceKey: PreferenceKey, Equatable {
+    static var defaultValue: [CGFloat] = []
     
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+    static func reduce(value: inout [CGFloat], nextValue: () -> [CGFloat]) {
+        value.append(contentsOf: nextValue())
     }
 }
 
@@ -81,19 +72,15 @@ struct ScrollViewContentView: View {
                     GeometryReader { epProxy -> AnyView in
                         return AnyView(
                             Text("\(epProxy.frame(in: .global).minY)")
-                                .preference(key: ScrollOffsetPreferenceKey.self, value: epProxy.frame(in: .global).minY)
+                                .preference(key: ScrollOffsetPreferenceKey.self,
+                                            value: [epProxy.frame(in: .global).minY])
                         )
                     }
                         
                     
                     Section(header: Text("0")) {
                         NavigationLink(destination: DetailView(title: "Nav")) {
-                            GeometryReader { subProxy -> AnyView in
-                                return AnyView(
-                                    Text("Navigation link")
-//                                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("myZstack")).maxY)
-                                )
-                            }
+                            Text("Navigation link")
                         }
                         Text("\(proxy.size.debugDescription)")
                     }
@@ -126,6 +113,9 @@ struct ScrollViewContentView: View {
                 }
                 .frame(width: proxy.size.width)
                 .coordinateSpace(name: "myZstack")
+                .onPreferenceChange(ScrollOffsetPreferenceKey.self) {
+                    print($0)
+                }
             )
         }
     }
