@@ -22,6 +22,11 @@ struct ScrollViewExample: View {
             ScrollViewContentView()
                 .offset(x: 0, y: 220 + offset)
                 .padding(.bottom, 220 + offset)
+                .onPreferenceChange(ScrollOffsetPreferenceKey.self) {
+                    print($0)
+                    self.offset = $0
+                }
+
         }
     }
 }
@@ -73,23 +78,28 @@ struct ScrollViewContentView: View {
             
             return AnyView(
                 Form {
+                    GeometryReader { epProxy -> AnyView in
+                        return AnyView(
+                            Text("\(epProxy.frame(in: .global).minY)")
+                                .preference(key: ScrollOffsetPreferenceKey.self, value: epProxy.frame(in: .global).minY)
+                        )
+                    }
+                        
+                    
                     Section(header: Text("0")) {
                         NavigationLink(destination: DetailView(title: "Nav")) {
                             GeometryReader { subProxy -> AnyView in
                                 return AnyView(
                                     Text("Navigation link")
-                                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("myZstack")).maxY)
+//                                        .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("myZstack")).maxY)
                                 )
                             }
                         }
                         Text("\(proxy.size.debugDescription)")
-                            .onTapGesture {
-                                print("TEST")
-                        }
                     }
                     Section(header: Text("1")) {
                         NavigationLink(destination: DetailView(title: "Nav")) {
-                            Text("Row 2")
+                            Text("\(proxy.frame(in: .named("myZstack")).debugDescription)")
                         }
                         Text("Row 3")
                         Text("Row 4")
