@@ -39,7 +39,7 @@ struct ContentView: View {
             
             NavigationView {
                 ScrollViewExample()
-                    .navigationBarTitle("Scroll")
+                    .navigationBarTitle("Scroll", displayMode: .inline)
             }
             .tabItem {
                 VStack {
