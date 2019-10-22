@@ -14,23 +14,24 @@ struct ScrollViewExample: View {
     
     var staticHeight: CGFloat = 84
     var extraHeight: CGFloat = 240
-    var headerHeight: CGFloat {
-        max(self.offset - 32, staticHeight)
-    }
-    var maxHeaderHeight: CGFloat {
-        staticHeight + extraHeight
+    
+    var maxHeaderHeight: CGFloat { staticHeight + extraHeight }
+    
+    private func headerHeight(in geometry: GeometryProxy) -> CGFloat {
+        max(self.offset - 32, staticHeight) + geometry.safeAreaInsets.top
     }
     
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
                 ScrollViewHeaderView(offset: self.offset,
-                                     desiredHeight: self.headerHeight + geometry.safeAreaInsets.top)
+                                     desiredHeight: self.headerHeight(in: geometry))
                     .zIndex(2)
                 
-                ScrollViewContentView(offset: self.headerHeight)
+                ScrollViewContentView(offset: self.headerHeight(in: geometry))
                     .coordinateSpace(name: "myZstack")
-                    .offset(y: min(self.headerHeight, self.maxHeaderHeight) + geometry.safeAreaInsets.top)
+                    .offset(y: min(self.headerHeight(in: geometry),
+                                   self.maxHeaderHeight + geometry.safeAreaInsets.top))
                     .zIndex(1)
                 
             }
