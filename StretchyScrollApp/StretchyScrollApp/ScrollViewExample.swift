@@ -15,7 +15,11 @@ struct ScrollViewExample: View {
     var staticHeight: CGFloat = 84
     var extraHeight: CGFloat = 240
     
-    var maxHeaderHeight: CGFloat { staticHeight + extraHeight }
+    private var maxHeaderHeight: CGFloat { staticHeight + extraHeight }
+    
+    private func contentOffset(in geometry: GeometryProxy) -> CGFloat {
+        min(headerHeight(in: geometry), maxHeaderHeight + geometry.safeAreaInsets.top)
+    }
     
     private func headerHeight(in geometry: GeometryProxy) -> CGFloat {
         max(self.offset - 32, staticHeight) + geometry.safeAreaInsets.top
@@ -30,9 +34,9 @@ struct ScrollViewExample: View {
                 
                 ScrollViewContentView(offset: self.headerHeight(in: geometry))
                     .coordinateSpace(name: "myZstack")
-                    .offset(y: min(self.headerHeight(in: geometry),
-                                   self.maxHeaderHeight + geometry.safeAreaInsets.top))
+                    .offset(y: self.contentOffset(in: geometry))
                     .zIndex(1)
+                    .padding(.bottom, self.contentOffset(in: geometry))
                 
             }
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { delta in
