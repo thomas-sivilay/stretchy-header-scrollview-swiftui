@@ -11,64 +11,83 @@ import SwiftUI
 struct ScrollViewExample: View {
     
     @State private var offset: CGFloat = 0
-    @State private var imageHeight: CGFloat = 100
+    
+    var staticHeight: CGFloat = 84
+    var extraHeight: CGFloat = 240
+    var headerHeight: CGFloat {
+        max(self.offset - 32, staticHeight)
+    }
+    var maxHeaderHeight: CGFloat {
+        staticHeight + extraHeight
+    }
     
     var body: some View {
-        ZStack {
-            ScrollViewHeaderView(offset: $offset, imageHeight: $imageHeight)
-                .zIndex(10)
-            ScrollViewContentView(offset: $offset)
-                .offset(x: 0, y: (imageHeight))
-                .zIndex(1)
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                ScrollViewHeaderView(offset: self.offset,
+                                     desiredHeight: self.headerHeight + geometry.safeAreaInsets.top)
+                    .zIndex(2)
+                
+                ScrollViewContentView(offset: self.headerHeight)
+                    .coordinateSpace(name: "myZstack")
+                    .offset(y: min(self.headerHeight, self.maxHeaderHeight) + geometry.safeAreaInsets.top)
+                    .zIndex(1)
+                
+            }
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { delta in
+                self.offset = delta - geometry.safeAreaInsets.top
+            }
         }
-        .coordinateSpace(name: "myZstack")
-        .onPreferenceChange(ScrollOffsetPreferenceKey.self) {
-            print($0)
-            self.offset = $0.first ?? 0
-        }
+        .edgesIgnoringSafeArea(.top)
     }
 }
 
 struct ScrollViewHeaderView: View {
     
-    @Binding var offset: CGFloat
-    @Binding var imageHeight: CGFloat
+    var offset: CGFloat
+    var desiredHeight: CGFloat
 
     var body: some View {
-        GeometryReader { proxy -> AnyView in
-            return AnyView(
-                ZStack {
-                    Image("catalina")
-                        .scaleEffect(0.25)
-                        .frame(height: max(self.offset, self.imageHeight))
-                        .clipped()
-                    VStack(spacing: 4) {
-                        Text("Content offset: \(self.offset)")
-                            .foregroundColor(.white)
-                            .bold()
-                            .multilineTextAlignment(.center)
-                            .font(.title)
-                    }
+        GeometryReader { proxy in
+            ZStack(alignment: .bottom) {
+                Image("catalina")
+                    .resizable()
+                    .aspectRatio(1, contentMode: .fill)
+                    .frame(height: self.desiredHeight)
+                    .clipped()
+                    .opacity(Double((self.desiredHeight - 128) / 200))
+                
+                VStack(spacing: 4) {
+                    Text("Height: \(self.desiredHeight)")
+                        .bold()
+                        .multilineTextAlignment(.center)
+                        .font(.title)
+                    Text("Content offset: \(self.offset)")
+                        .bold()
+                        .multilineTextAlignment(.center)
+                        .font(.title)
+                        .padding(.bottom, 8)
+                    Divider()
                 }
-                .frame(width: proxy.size.width, height: max(self.offset, self.imageHeight))
-                .clipped()
-            )
+                .background(Color.white)
+            }
+            .background(Color.white)
         }
+        .frame(height: self.desiredHeight)
     }
 }
 
 struct ScrollOffsetPreferenceKey: PreferenceKey, Equatable {
-    static var defaultValue: [CGFloat] = []
-    
-    static func reduce(value: inout [CGFloat], nextValue: () -> [CGFloat]) {
-        value.append(contentsOf: nextValue())
+    static var defaultValue: CGFloat = 0
+        
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value += nextValue()
     }
 }
 
 struct ScrollViewContentView: View {
     
-    let correction: CGFloat = 85 + 44
-    @Binding var offset: CGFloat
+    var offset: CGFloat
     
     var body: some View {
         GeometryReader { proxy -> AnyView in
@@ -76,13 +95,15 @@ struct ScrollViewContentView: View {
                 Form {
                     GeometryReader { epProxy -> AnyView in
                         return AnyView(
-                            Text("\(epProxy.frame(in: .named("myZstack")).minY - self.correction)")
+                            Text("\(epProxy.frame(in: .named("myZstack")).minY)")
                                 .preference(key: ScrollOffsetPreferenceKey.self,
-                                            value: [epProxy.frame(in: .named("myZstack")).minY - self.correction])
+                                            value: epProxy.frame(in: .named("myZstack")).minY)
                         )
                     }
                                             
                     Section(header: Text("0")) {
+                        Text("Offset: \(self.offset)")
+                        
                         NavigationLink(destination: DetailView(title: "Nav")) {
                             Text("Navigation link")
                         }
@@ -124,7 +145,14 @@ struct ScrollViewContentView: View {
 #if DEBUG
 struct ScrollViewExample_Previews: PreviewProvider {
     static var previews: some View {
-        ScrollViewExample()
+        Group {
+            ScrollViewExample()
+            
+            NavigationView {
+                ScrollViewExample()
+                    .navigationBarTitle("Title", displayMode: .inline)
+            }
+        }
     }
 }
 #endif
