@@ -79,7 +79,7 @@ struct ScrollViewExample: View {
 
     var body: some View {
         ScrollViewContentView()
-            .modifier(StacyHeader(staticHeight: 64, extraHeight: 200, content: { desiredHeight in
+            .modifier(StacyHeader(staticHeight: 64, extraHeight: 100, content: { desiredHeight in
                 ScrollViewHeaderView(desiredHeight: desiredHeight)
             }))
     }
@@ -97,17 +97,17 @@ struct ScrollViewHeaderView: View {
                     .aspectRatio(1, contentMode: .fill)
                     .frame(height: self.desiredHeight)
                     .clipped()
-                    .opacity(Double((self.desiredHeight - 108) / 200))
+                    .opacity(Double((self.desiredHeight - proxy.safeAreaInsets.top - 64) / 100))
                 
                 VStack(spacing: 4) {
-                    Text("Height: \(self.desiredHeight)")
+                    Text("Height: \(self.desiredHeight - proxy.safeAreaInsets.top)")
                         .bold()
+                        .foregroundColor((self.desiredHeight - proxy.safeAreaInsets.top == 64) ? .black : .white)
                         .multilineTextAlignment(.center)
                         .font(.title)
                         .padding()
                     Divider()
                 }
-                .background(Color.white)
                 .padding(.top, proxy.safeAreaInsets.top)
             }
             .background(Color.white)
