@@ -11,9 +11,7 @@ import SwiftUI
 struct StacyHeader<Header: View>: ViewModifier {
     
     @State private var offset: CGFloat
-    
-    private var magicNumber: CGFloat = 32
-    
+        
     var staticHeight: CGFloat
     var extraHeight: CGFloat
     var headerBuilder: (_ desiredHeight: CGFloat) -> Header
@@ -22,7 +20,7 @@ struct StacyHeader<Header: View>: ViewModifier {
         self.staticHeight = staticHeight
         self.extraHeight = extraHeight
         self.headerBuilder = content
-        self._offset = State(initialValue: staticHeight + extraHeight + magicNumber)
+        self._offset = State(initialValue: staticHeight + extraHeight)
     }
     
     private var maxHeaderHeight: CGFloat { staticHeight + extraHeight }
@@ -32,7 +30,7 @@ struct StacyHeader<Header: View>: ViewModifier {
     }
     
     private func headerHeight(in geometry: GeometryProxy) -> CGFloat {
-        max(self.offset - magicNumber, staticHeight) + geometry.safeAreaInsets.top
+        max(self.offset, staticHeight) + geometry.safeAreaInsets.top
     }
     
     func body(content: Content) -> some View {
@@ -61,6 +59,8 @@ struct ScrollOffsetPreferenceKey: PreferenceKey, Equatable {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value += nextValue()
     }
+    
+    var correction: CGFloat = 0
 }
 
 extension ScrollOffsetPreferenceKey: ViewModifier {
@@ -69,7 +69,7 @@ extension ScrollOffsetPreferenceKey: ViewModifier {
         GeometryReader { epProxy -> AnyView in
             AnyView(
                 content
-                    .preference(key: ScrollOffsetPreferenceKey.self, value: epProxy.frame(in: .global).minY)
+                    .preference(key: ScrollOffsetPreferenceKey.self, value: epProxy.frame(in: .global).minY - self.correction)
             )
         }
     }
@@ -91,7 +91,7 @@ struct ScrollViewHeaderView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
+            ZStack {
                 Image("catalina")
                     .resizable()
                     .aspectRatio(1, contentMode: .fill)
@@ -108,6 +108,7 @@ struct ScrollViewHeaderView: View {
                     Divider()
                 }
                 .background(Color.white)
+                .padding(.top, proxy.safeAreaInsets.top)
             }
             .background(Color.white)
         }
@@ -119,7 +120,7 @@ struct ScrollViewContentView: View {
     var body: some View {
         Form {
             Text("Top content")
-                .modifier(ScrollOffsetPreferenceKey())
+                .modifier(ScrollOffsetPreferenceKey(correction: 32))
             
             Section(header: Text("0")) {
                 NavigationLink(destination: DetailView(title: "Nav")) {
