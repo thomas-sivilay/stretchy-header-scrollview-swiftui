@@ -8,12 +8,22 @@
 
 import SwiftUI
 
-struct ScrollViewExample: View {
+struct StacyHeader<Header: View>: ViewModifier {
     
-    @State private var offset: CGFloat = 0
+    @State private var offset: CGFloat
     
-    var staticHeight: CGFloat = 84
-    var extraHeight: CGFloat = 240
+    private var magicNumber: CGFloat = 32
+    
+    var staticHeight: CGFloat
+    var extraHeight: CGFloat
+    var headerBuilder: (_ desiredHeight: CGFloat) -> Header
+    
+    init(staticHeight: CGFloat, extraHeight: CGFloat, @ViewBuilder content: @escaping (CGFloat) -> Header) {
+        self.staticHeight = staticHeight
+        self.extraHeight = extraHeight
+        self.headerBuilder = content
+        self._offset = State(initialValue: staticHeight + extraHeight + magicNumber)
+    }
     
     private var maxHeaderHeight: CGFloat { staticHeight + extraHeight }
     
@@ -22,63 +32,26 @@ struct ScrollViewExample: View {
     }
     
     private func headerHeight(in geometry: GeometryProxy) -> CGFloat {
-        max(self.offset - 32, staticHeight) + geometry.safeAreaInsets.top
+        max(self.offset - magicNumber, staticHeight) + geometry.safeAreaInsets.top
     }
     
-    var body: some View {
+    func body(content: Content) -> some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
-                ScrollViewHeaderView(offset: self.offset,
-                                     desiredHeight: self.headerHeight(in: geometry))
+                self.headerBuilder(self.headerHeight(in: geometry))
+                    .frame(height: self.headerHeight(in: geometry))
                     .zIndex(2)
                 
-                ScrollViewContentView(offset: self.headerHeight(in: geometry))
-                    .coordinateSpace(name: "myZstack")
+                content
                     .offset(y: self.contentOffset(in: geometry))
                     .zIndex(1)
                     .padding(.bottom, self.contentOffset(in: geometry))
-                
             }
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { delta in
                 self.offset = delta - geometry.safeAreaInsets.top
             }
         }
         .edgesIgnoringSafeArea(.top)
-    }
-}
-
-struct ScrollViewHeaderView: View {
-    
-    var offset: CGFloat
-    var desiredHeight: CGFloat
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
-                Image("catalina")
-                    .resizable()
-                    .aspectRatio(1, contentMode: .fill)
-                    .frame(height: self.desiredHeight)
-                    .clipped()
-                    .opacity(Double((self.desiredHeight - 128) / 200))
-                
-                VStack(spacing: 4) {
-                    Text("Height: \(self.desiredHeight)")
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .font(.title)
-                    Text("Content offset: \(self.offset)")
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .font(.title)
-                        .padding(.bottom, 8)
-                    Divider()
-                }
-                .background(Color.white)
-            }
-            .background(Color.white)
-        }
-        .frame(height: self.desiredHeight)
     }
 }
 
@@ -90,59 +63,93 @@ struct ScrollOffsetPreferenceKey: PreferenceKey, Equatable {
     }
 }
 
-struct ScrollViewContentView: View {
+extension ScrollOffsetPreferenceKey: ViewModifier {
     
-    var offset: CGFloat
-    
-    var body: some View {
-        GeometryReader { proxy -> AnyView in
-            return AnyView(
-                Form {
-                    GeometryReader { epProxy -> AnyView in
-                        return AnyView(
-                            Text("\(epProxy.frame(in: .named("myZstack")).minY)")
-                                .preference(key: ScrollOffsetPreferenceKey.self,
-                                            value: epProxy.frame(in: .named("myZstack")).minY)
-                        )
-                    }
-                                            
-                    Section(header: Text("0")) {
-                        Text("Offset: \(self.offset)")
-                        
-                        NavigationLink(destination: DetailView(title: "Nav")) {
-                            Text("Navigation link")
-                        }
-                        Text("\(proxy.size.debugDescription)")
-                    }
-                    Section(header: Text("1")) {
-                        NavigationLink(destination: DetailView(title: "Nav")) {
-                            Text("\(proxy.frame(in: .named("myZstack")).debugDescription)")
-                        }
-                        Text("Row 3 - \(self.offset)")
-                        Text("Row 4")
-                        Text("Row 5")
-                        NavigationLink(destination: DetailView(title: "Nav")) {
-                            Text("Row 6")
-                        }
-                    }
-                    Section(header: Text("2")) {
-                        Text("Row 7")
-                        Text("Row 8")
-                        Text("Row 9")
-                        Text("Row 10")
-                        Text("Row 11")
-                    }
-                    Section(header: Text("3")) {
-                        Text("Row 12")
-                        Text("Row 13")
-                        Text("Row 14")
-                        Text("Row 15")
-                        Text("Row 16")
-                    }
-
-                }
-                .frame(width: proxy.size.width)
+    func body(content: Content) -> some View {
+        GeometryReader { epProxy -> AnyView in
+            AnyView(
+                content
+                    .preference(key: ScrollOffsetPreferenceKey.self, value: epProxy.frame(in: .global).minY)
             )
+        }
+    }
+}
+
+struct ScrollViewExample: View {
+
+    var body: some View {
+        ScrollViewContentView()
+            .modifier(StacyHeader(staticHeight: 64, extraHeight: 200, content: { desiredHeight in
+                ScrollViewHeaderView(desiredHeight: desiredHeight)
+            }))
+    }
+}
+
+struct ScrollViewHeaderView: View {
+    
+    var desiredHeight: CGFloat
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .bottom) {
+                Image("catalina")
+                    .resizable()
+                    .aspectRatio(1, contentMode: .fill)
+                    .frame(height: self.desiredHeight)
+                    .clipped()
+                    .opacity(Double((self.desiredHeight - 108) / 200))
+                
+                VStack(spacing: 4) {
+                    Text("Height: \(self.desiredHeight)")
+                        .bold()
+                        .multilineTextAlignment(.center)
+                        .font(.title)
+                        .padding()
+                    Divider()
+                }
+                .background(Color.white)
+            }
+            .background(Color.white)
+        }
+    }
+}
+
+struct ScrollViewContentView: View {
+        
+    var body: some View {
+        Form {
+            Text("Top content")
+                .modifier(ScrollOffsetPreferenceKey())
+            
+            Section(header: Text("0")) {
+                NavigationLink(destination: DetailView(title: "Nav")) {
+                    Text("Navigation link")
+                }
+            }
+            Section(header: Text("1")) {
+                NavigationLink(destination: DetailView(title: "Nav")) {
+                    Text("Some navigation")
+                }
+                Text("Row 4")
+                Text("Row 5")
+                NavigationLink(destination: DetailView(title: "Nav")) {
+                    Text("Row 6")
+                }
+            }
+            Section(header: Text("2")) {
+                Text("Row 7")
+                Text("Row 8")
+                Text("Row 9")
+                Text("Row 10")
+                Text("Row 11")
+            }
+            Section(header: Text("3")) {
+                Text("Row 12")
+                Text("Row 13")
+                Text("Row 14")
+                Text("Row 15")
+                Text("Row 16")
+            }
         }
     }
 }
