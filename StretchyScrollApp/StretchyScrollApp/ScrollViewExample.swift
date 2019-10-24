@@ -8,7 +8,8 @@
 
 import SwiftUI
 
-struct StacyHeader<Header: View>: ViewModifier {
+/// Modifier that wraps the main view, and adds a header between min and max height
+struct StretcyHeader<Header: View>: ViewModifier {
     
     @State private var offset: CGFloat
         
@@ -53,6 +54,7 @@ struct StacyHeader<Header: View>: ViewModifier {
     }
 }
 
+/// Preference key reserved for offset
 struct ScrollOffsetPreferenceKey: PreferenceKey, Equatable {
     static var defaultValue: CGFloat = 0
         
@@ -60,9 +62,11 @@ struct ScrollOffsetPreferenceKey: PreferenceKey, Equatable {
         value += nextValue()
     }
     
+    /// the position of the observed elemet in the parent
     var correction: CGFloat = 0
 }
 
+/// ViewModifier extension to wrap any view in stolling content
 extension ScrollOffsetPreferenceKey: ViewModifier {
     
     func body(content: Content) -> some View {
@@ -79,7 +83,7 @@ struct ScrollViewExample: View {
 
     var body: some View {
         ScrollViewContentView()
-            .modifier(StacyHeader(staticHeight: 64, extraHeight: 100, content: { desiredHeight in
+            .modifier(StretcyHeader(staticHeight: 64, extraHeight: 100, content: { desiredHeight in
                 ScrollViewHeaderView(desiredHeight: desiredHeight)
             }))
     }
