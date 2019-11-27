@@ -80,19 +80,21 @@ extension ScrollOffsetPreferenceKey: ViewModifier {
 }
 
 struct ScrollViewExample: View {
-
+    
     var body: some View {
-        ScrollViewContentView()
-            .modifier(StretcyHeader(staticHeight: 64, extraHeight: 100, content: { desiredHeight in
-                ScrollViewHeaderView(desiredHeight: desiredHeight)
-            }))
+        ZStack  {
+            ScrollViewContentView()
+        }
+        .modifier(StretcyHeader(staticHeight: 64, extraHeight: 100, content: { desiredHeight in
+            ScrollViewHeaderView(desiredHeight: desiredHeight)
+        }))
     }
 }
 
 struct ScrollViewHeaderView: View {
     
     var desiredHeight: CGFloat
-
+    
     var body: some View {
         GeometryReader { proxy in
             ZStack {
@@ -120,17 +122,23 @@ struct ScrollViewHeaderView: View {
 }
 
 struct ScrollViewContentView: View {
+    
+    @State private var topPadding: CGFloat = 28
         
     var body: some View {
         Form {
-            Text("Top content")
-                .modifier(ScrollOffsetPreferenceKey(correction: 32))
-            
-            Section(header: Text("0")) {
+            Section(header: Text("0").padding(.top, topPadding)) {
                 NavigationLink(destination: DetailView(title: "Nav")) {
                     Text("Navigation link")
+                        .modifier(ScrollOffsetPreferenceKey(correction: 32 + topPadding))
+                        .frame(height: 20)
                 }
+                
+                Stepper(onIncrement: { self.topPadding += 1},
+                        onDecrement: { self.topPadding -= 1 },
+                        label: { Text("Top padding: \(topPadding)") })
             }
+            
             Section(header: Text("1")) {
                 NavigationLink(destination: DetailView(title: "Nav")) {
                     Text("Some navigation")
